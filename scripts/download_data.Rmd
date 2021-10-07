@@ -1,0 +1,118 @@
+---
+title: "Download data from Drive"
+author: "Camila Vargas"
+date: "10/6/2021"
+output: html_document
+---
+
+This script downloads the data needed for this project from a specific folder on our Google Drive
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(googledrive)
+library(here)
+library(tidyverse)
+
+
+## Sets R not to use scientific notations
+options(scipen=999) 
+
+```
+
+## General Function
+```{r}
+download_data <- function(url,
+                          code_name){
+  folder_url <- url
+
+# list of files inside the folder
+files <- drive_ls(as_id(folder_url))
+
+
+## Download all file to local computer. 
+purrr::walk2(
+    map(files$id, as_id),
+    paste0("raw_data/", code_name,"_", files$name),
+    drive_download,
+    overwrite = TRUE)
+                          }
+```
+
+
+
+
+## Download data files into local computer
+
+Use the `download_data()` function to get the data from any folder in the drive.
+url = url of folder you want to get the data
+code_name = prefix you want you data set name yo have if any
+
+1. Plants data
+
+```{r download weather files}
+
+download_data(url = "https://drive.google.com/drive/u/0/folders/1x5BfrEK2dUL1iaKznTUzOigpC1WqaDvG",
+            code_name = "plants")
+
+```
+
+2. Spider
+
+```{r}
+
+
+spider_folder_url <- "https://drive.google.com/drive/u/0/folders/1QyMr6GOTCYCPIEAuO4ksf_LIgPFiq15Q"
+
+
+download_data(url = spider_folder_url,
+              code_name = "spider")
+
+```
+
+
+3. Soil
+
+```{r}
+
+# url of folder where the data lives
+# Copy paste the url of the folder where the data lives
+
+soil_folder_url <- "https://drive.google.com/drive/u/0/folders/1YbNq0k2_7GBDBh_U3-Md_sRJd4WlD4Lm"
+
+download_data(url = soil_folder_url,
+              code_name = "soil")
+```
+
+4. Baselines
+```{r}
+
+# url of folder where the data lives
+# Copy paste the url of the folder where the data lives
+
+baseline_folder_url <- "https://drive.google.com/drive/u/0/folders/1y1nixYCL8O1DgdryYCUTpTMCfYT4M8YU"
+
+download_data(url = baseline_folder_url,
+              code_name = "baseline")
+
+```
+
+
+5. Other Animals
+
+```{r}
+animals_folder_url <- "https://drive.google.com/drive/u/0/folders/1MDyF2fajJW3bUUhvtozq1vv5dZeGjg0k"
+
+download_data(url = animals_folder_url,
+              code_name = "animals")
+
+```
+
+6. Geckos
+```{r}
+geckos_folder <- "https://drive.google.com/drive/u/0/folders/1slotCD-6vBm2ZpFW1qXwcAD_0B_PdfoN"
+
+download_data(url = geckos_folder,
+              code_name = "geckos")
+```
+
