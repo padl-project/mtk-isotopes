@@ -79,7 +79,8 @@ plant_compile <- read_excel(all_xls$path[1], sheet = "Sheet1") %>%
   rename(species_code = species_1,
          species = species_12,
          amp_n = amp_v_5,
-         amp_c = amp_v_6)
+         amp_c = amp_v_6) %>% 
+  mutate(year = date)
 
 ```
 
@@ -161,27 +162,62 @@ colnames(plant_2012)
          amp_n = amp_v_6,
          amp_c = amp_v_7 ) %>% 
   select(-id_number_3, -run) %>% 
-  mutate_at(vars(amp_n, amp_c, d15n, d13c, c_n), as.numeric)
+  mutate_at(vars(amp_n, amp_c, d15n, d13c, c_n), as.numeric) %>% 
+  mutate(year = year(date))
 
 ```
 
-## Compare bothe data sets
+## Compare both data sets
 
 The compile against the all years
 
 Both have the same measurements. The big question is: is the compile a subset of the all_yrs data?
 
-
-Apparently compile is not only a subset! it has more the is not in th all years.
 ```{r}
 
+setdiff(plant_compile$wt_mg, plant_all_yrs$wt_mg)
 
+setdiff(plant_all_yrs$wt_mg, plant_compile$wt_mg)
+
+setdiff(plant_compile$amp_n, plant_all_yrs$amp_n)
+
+setdiff(plant_all_yrs$amp_n, plant_compile$amp_n)
+
+```
+
+Looking at the difference between the two data in the different numeric parameters. There is no consistency on values that match between the two sets and that are different. 
+This means that the compile is not a subset of the all year data.
+
+Next step is to bind them together and remove duplicates.
+
+## Row bind and remove duplicates
+
+```{r}
+
+all_data <- plant_compile %>% 
+  mutate(date = NA) %>% 
+  bind_rows(plant_all_yrs) %>% 
+  select(-species_code, -date) %>% 
+  mutate(island_name = recode(island_name,
+                              "Cast" = "Castor",
+                              "Dudl" = "Dudley",
+                              "East" = "Eastern",
+                              "Engi" = "Engineer",
+                              "Frig" = "Frigate",
+                              "Hole" = "Holei",
+                              "Kaul" = "Kaula",
+                              "Para" = "Paradise",
+                              "Port" = "Portsmouth",
+                              "Saci" = "Sacia"),
+         type = "plant") %>%
+  distinct()
 
 ```
 
 
+For the most part ready! need to figure put how to add the date to the records that have Ana actual date!
 
-
+And decide if we want to publish each data set separately or all together. This might be a question for Ana.
 
 
 
