@@ -86,6 +86,12 @@ soil_12 <- read_excel(all_xls$path[3], sheet = "Sheet1", skip = 4) %>%
 
 Data set 11 and 12 all columns match. 11 and 12 are the same data sets!
 
+There are slight differences in the decimals but technically they are the same dataset?
+
+Functions to check if two data frames are de same:
+`identical()`
+`all_equal()`
+
 **2012 Data**
 id_number_1_1 = date
 id_number_1_2 = island

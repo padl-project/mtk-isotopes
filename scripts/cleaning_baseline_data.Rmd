@@ -1,0 +1,99 @@
+---
+title: "Cleaning baseline isotope data"
+author: "Camila Vargas"
+date: "10/12/2021"
+output: html_document
+---
+
+## Set up
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(lubridate)
+
+## Sets R not to use scientific notations
+options(scipen=999) 
+
+```
+
+
+## Check all necesary files are in the raw_data folder
+
+```{r}
+## File path to raw data used in this script
+raw_data_path <- here::here("raw_data")
+
+# Count files inside the raw_data folder to make sure the number of files downloaded is what is expected.
+length(list.files(raw_data_path, pattern = "baseline"))
+
+## in this case there should be **2** files
+```
+
+
+## Table with all the raw data files
+```{r}
+
+## List with all xls files
+all_xls <- tibble(list.files(raw_data_path, pattern = "baseline")) %>% #c("xls", "xlsx")
+  rename(file_name = 1) %>% 
+  mutate(path = paste0(raw_data_path, "/", file_name),
+         n = 1:n(),
+         ### UPDATE
+         type = "baseline") %>% 
+  unite(obj_name, type, n, sep = "_", remove = FALSE)
+
+```
+
+
+## Read data
+
+```{r}
+
+## 2008 Algae
+
+## check sheet names
+excel_sheets(all_xls$path[1]) ## Only one sheet
+
+baseline_algae <- read_excel(all_xls$path[1], sheet = "Sheet1", skip = 4) %>% 
+  clean_names()
+
+## 2008 Guano
+excel_sheets(all_xls$path[2]) ## Only one sheet
+
+baseline_guano <- read_excel(all_xls$path[4], sheet = "Sheet1", skip = 4) %>% 
+  clean_names()
+
+```
+
+Both datasets have the same colnames! But ID#3 in Algae data is Location = Palmyra and in Guano is Type = Guano.
+
+Don't mess up with colnames. We will just keep names as id_1, id_2 and let the author describe what wach ide means!
+
+
+## Cleaning baseline data
+
+```{r}
+baseline_complete <- bind_rows(baseline_algae, baseline_guano) %>% 
+  rename(amp_v_n = amp_v_6,
+         amp_v_c = amp_v_7,
+         d15n_air = d15n,
+         d13c_pdb = d13c,
+         c_n_atomic = c_n) %>% 
+  filter(!is.na(date))
+  
+```
+
+
+## Save to clean data
+
+```{r}
+write_csv(baseline_complete, here::here("clean_data/2009_palmyra_baseline_isotopes.csv"))
+```
+
+
+
