@@ -52,7 +52,7 @@ all_xls <- tibble(list.files(raw_data_path, pattern = "soil")) %>% #c("xls", "xl
 
 ## Read data
 
-
+- 2007 and 2008 data
 ```{r}
 ## check sheet names
 excel_sheets(all_xls$path[1]) ## Only sheet one has data
@@ -62,5 +62,77 @@ soil_07_08 <- read_excel(all_xls$path[1], sheet = "Sheet1") %>%
 
 ```
 
+- 2011 data
+```{r}
+## check sheet names
+excel_sheets(all_xls$path[2]) ## Only sheet one has data
 
+soil_11 <- read_excel(all_xls$path[2], sheet = "Sheet1", skip = 4) %>% 
+  clean_names()
+```
+
+
+- 2012 data
+```{r}
+## check sheet names
+excel_sheets(all_xls$path[3]) ## Only sheet one has data
+
+soil_12 <- read_excel(all_xls$path[3], sheet = "Sheet1", skip = 4) %>% 
+  clean_names()
+
+```
+
+### Notes
+
+Data set 11 and 12 all columns match. 11 and 12 are the same data sets!
+
+**2012 Data**
+id_number_1_1 = date
+id_number_1_2 = island
+id_number_2 = Location (Palmyra)
+id_number_3 = type (soil)
+
+Rename and add a column named horizon with NAs
+
+**Data 07-08**
+id_number_1 = number
+id_number_2 = type (soil)
+id_number_3 = Location (Palmyra)
+
+Remove id_number 1, rename id_2 and id_3
+
+## Organizing data so all columns match
+
+```{r}
+
+new_07_08 <- soil_07_08 %>% 
+  rename(type = id_number_2,
+         location = id_number_3,
+         amp_v_n = amp_v_6,
+         amp_v_c = amp_v_7) %>% 
+  select(-id_number_1) %>% 
+  mutate_at(vars(wt_percent_c, d13c, c_n), as.character)
+
+
+new_2012 <- soil_12 %>% 
+  filter(amp_v_6 != "N") %>% 
+  rename(date = id_number_1_1,
+         island = id_number_1_2,
+         location = id_number_2,
+         type = id_number_3,
+         amp_v_n = amp_v_6,
+         amp_v_c = amp_v_7) %>% 
+  mutate(horizon = NA) %>% 
+  mutate_at(vars(5:8,10), as.numeric)
+
+```
+
+## All data together
+
+```{r}
+soil_complete <- bind_rows(new_07_08, new_2012)
+```
+
+***Question for ANA***
+Are the amp_v values on 07-08 data for N and C respectively on columns 8 and 9?
 
