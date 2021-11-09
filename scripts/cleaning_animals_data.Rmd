@@ -4,6 +4,9 @@ author: "Camila Vargas"
 date: "10/12/2021"
 output: html_document
 ---
+
+Cleaning and formating other animal isotope data provided by Ana Miller-ter Kuile to PADL. Raw data [here.](https://github.com/anamtk/palmyra/tree/main/raw_data/isotope_data)
+
 ## Set up
 
 ```{r setup, include=FALSE}
@@ -49,9 +52,179 @@ all_xls <- tibble(list.files(raw_data_path, pattern = "animals")) %>% #c("xls", 
 ```
 
 
-## Read data
+## Read, explore, clean, save
+
+### Data set 1: Intertidal Organisms
+
+Data looks pretty clean, The main question is why are there two Amp (v) columns.
+20 variables
+
+**Date Range**
+"2009-04-30 UTC" "2010-01-06 UTC"
 ```{r}
+## intertidal organisms
+
+## Explore
 excel_sheets(all_xls$path[1])
+
+## Read
+intertidal_org <- read_excel(all_xls$ path[1], sheet = "Sheet1") %>% 
+  clean_names()
+
+## Clean
+intertidal_clean <- intertidal_org %>% 
+  rename(amp_1 = amp_v_13, ## v = volts
+         amp_2 = amp_v_14,
+         wt_n = wt_percent_n,
+         wt_c = wt_percent_c)
+
+## Save
+write_csv(intertidal_clean, here::here("clean_data/2009_2010_palmyra_intertidal_organisms_isotope.csv"))
+
+```
+
+
+Data set 2: Rat data
+
+Data is for the most part clean. Only has 14 variables and column name partially match the intertidal data.
+
+**Date range**
+2009-04-28 UTC" "2009-10-31 UTC"
+
+```{r}
+## Rat isotopes
+excel_sheets(all_xls$path[2]) ## 2 sheets only sheet 1 has data
+
+## Read
+rat_data <- read_excel(all_xls$path[2], sheet = "Sheet1") %>% 
+  clean_names()
+
+## Clean
+rat_clean <- rat_data %>% 
+  rename(amp_1 = amp_v_6,
+         amp_2 = amp_v_7,
+         site = island_name,
+         wt_n = wt_percent_n,
+         wt_c = wt_percent_c) %>% 
+  select(-x2)
+
+## Save
+write_csv(rat_clean, here::here("clean_data/2009_palmyra_rat_isotope.csv"))
+
+```
+
+Data set 3: Crab data
+
+15 variables
+two column with no name
+similar measurements. Differences are in identification columns
+
+**Date range**
+2009-09-21 UTC" "2009-10-25 UTC
+
+```{r}
+## crab isotopes
+excel_sheets(all_xls$path[3]) ## 2 sheets only sheet 1 has data
+
+## Read
+crab_data <- read_excel(all_xls$path[3], sheet = "Sheet1") %>% 
+  clean_names()
+
+## Clean
+crab_clean <- crab_data %>% 
+  rename(id = x2,
+         site = island_name,
+         amp_1 = amp_v_6,
+         amp_2 = amp_v_7,
+         wt_n = wt_percent_n,
+         wt_c = wt_percent_c,
+         organism_species = x15)
+
+## Save
+write_csv(crab_clean, here::here("clean_data/2009_palmyra_crab_isotope.csv"))
+
+```
+
+Data set 4: Amphipod and Isopod data
+
+17 columns, last 2 have no relevant data
+Two columns with no name
+Similar measurements to all other data sets. Main differences is in how the recorded the ids for each measurement.
+Date needs to be fixed!
+
+
+```{r}
+## Amphipod and isopod data
+excel_sheets(all_xls$path[4]) ## 2 sheets only sheet 1 has data
+
+## Read
+amph_data <- read_excel(all_xls$path[4], sheet = "Sheet1") %>% 
+  clean_names()
+
+## Clean
+amph_clean <- amph_data %>% 
+  rename(id_1 = x3,
+         id_2 = x4,
+         id_3 = x6,
+         site = island_name,
+         amp_1 = amp_v_9,
+         amp_2 = amp_v_10,
+         wt_n = wt_percent_n,
+         wt_c = wt_percent_c) %>% 
+  mutate(date = case_when(date_run != "March 23 2010" ~ date_run),
+         date = as.numeric(date),
+         date = as.POSIXct(date*86400, origin = "1899-12-30", tz = "HAST"),
+         date = case_when(is.na(date) ~ as.POSIXct(ymd("20100323"), tz = "GMT"),
+                          T ~ date)) %>% 
+  select(date, everything(), -x16, -x17, -date_run)
+  
+## SOLVE DATE ISSUE ##
+
+## Save
+write_csv(amph_clean, here::here("clean_data/"))
+
+```
+
+Data set 5: Insect data 2010
+
+15 variables 
+All column have names
+Two Amp_v columns
+
+```{r}
+## insect data
+excel_sheets(all_xls$path[5]) ## 2 sheets only sheet 1 has data
+
+insect_data <- read_excel(all_xls$path[5], sheet = "Sheet1", skip = 4) %>% 
+  clean_names()
+```
+
+Data set 6: Geograpsus Crab
+
+Contains weight and length data for this species (Does this data belong to body size package?)
+Here we are only going to clean isotope data
+
+```{r}
+## georapsus crab data
+excel_sheets(all_xls$path[6]) ## only reading isotopes sheets. "isotopes 2013" & "isotopes 2014-2015"
+
+
+gcrab_13 <- read_excel(all_xls$path[6], sheet = "isotopes 2013") %>% 
+  clean_names()
+
+gcrab_14_15 <- read_excel(all_xls$path[6], sheet = "isotopes 2014-2015") %>% 
+  clean_names()
+
+
+gcrab_13_clean <- gcrab_13 %>% 
+  mutate(year = 2013) %>% 
+  select(year, everything(), -d13c_comment, -estimated_enrichment)
+
+gcrab_14_15_clean <- gcrab_14_15 %>% 
+  rename(site = islet) %>% 
+  select(year, everything())
+
+
 ```
 
 

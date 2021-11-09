@@ -5,6 +5,10 @@ date: "10/12/2021"
 output: html_document
 ---
 
+Cleaning baseline isotope data provided by Ana Miller-ter Kuile to PADL. Raw data [here.](https://github.com/anamtk/palmyra/tree/main/raw_data/isotope_data)
+
+
+
 ## Set up
 
 ```{r setup, include=FALSE}
@@ -72,7 +76,7 @@ baseline_guano <- read_excel(all_xls$path[4], sheet = "Sheet1", skip = 4) %>%
 
 Both datasets have the same colnames! But ID#3 in Algae data is Location = Palmyra and in Guano is Type = Guano.
 
-Don't mess up with colnames. We will just keep names as id_1, id_2 and let the author describe what wach ide means!
+Don't mess up with colnames. We will just keep names as id_1, id_2 and let the author describe what each ide means!
 
 
 ## Cleaning baseline data
